@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of customers</title>
+    <th:block th:replace="layout/head" />
+</head>
+<body>
+<div class="container">
+    <div th:if="${success}">
+        <!--                            <h4 style="color: green;" th:text="${message}"></h4>-->
+        <script>
+            window.onload = function (){
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Chỉnh sửa thông tin khách hàng thành công',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            }
+        </script>
+    </div>
+    <header>
+        <div class="col-lg-6">
+            <h1>List of customers</h1>
+        </div>
+        <div class="col-lg-6 header-right-button">
+            <a href="#">
+                <button class="btn btn-outline-light">
+                    <i class="fas fa-history"></i>
+                    Transfer histories
+                </button>
+            </a>
+            <a href="/customers/create">
+                <button class="btn btn-outline-light">
+                    <i class="fas fa-user-plus"></i>
+                    Add new customer
+                </button>
+            </a>
+        </div>
+    </header>
+
+    <div class="content">
+        <table class="table table-hover">
+            <thead>
+            <tr class="text-center">
+                <th>#</th>
+                <th>Full name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Balance</th>
+                <th colspan="5">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block th:each="item : ${customers}">
+                <tr class="text-center">
+                    <td th:text="${item.id}" class="text-center"></td>
+                    <td th:text="${item.fullName}"></td>
+                    <td th:text="${item.email}" class="text-center"></td>
+                    <td th:text="${item.phone}" class="text-center"></td>
+                    <td th:text="${item.address}"></td>
+                    <td th:text="${item.balance}" class="text-center num-space"></td>
+                    <td>
+                        <a th:href="@{/customers/edit/__${item.id}__}">
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </a>
+
+                    </td>
+                    <td>
+                        <a th:href="@{/customers/deposit/__${item.id}__}">
+                            <button class="btn btn-outline-success">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </a>
+                    </td>
+                    <td>
+                        <a th:href="@{/customers/withdraw/__${item.id}__}">
+                            <button class="btn btn-outline-info">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </a>
+                    </td>
+                    <td>
+                        <a th:href="@{/customers/withdraw/__${item.id}__}">
+                            <button class="btn btn-outline-warning">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                        </a>
+                    </td>
+                    <td>
+                        <a th:href="@{/customers/withdraw/__${item.id}__}">
+                            <button class="btn btn-outline-danger">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+            </th:block>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<th:block th:replace="layout/script"/>
+</body>
+</html>

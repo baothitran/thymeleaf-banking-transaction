@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Deposit</title>
+    <th:block th:replace="layout/head" />
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="col-lg-6">
+            <h1>Deposit</h1>
+        </div>
+        <div class="col-lg-6 header-right-button">
+            <a href="/customers">
+                <button class="btn btn-outline-light">
+                    <i class="fas fa-bars"></i>
+                    List of customers
+                </button>
+            </a>
+        </div>
+    </header>
+
+    <div class="content">
+        <form method="post" th:object="${deposit}">
+            <div class="row mb-3">
+                <div class="col-lg-6">
+                    <label class="fw-bold">Customer ID</label>
+                    <input type="email" class="form-control" th:field="*{customer.id}" readonly>
+                </div>
+                <div class="col-lg-6">
+                    <label class="fw-bold">Full Name</label>
+                    <input type="text" class="form-control" th:field="*{customer.fullName}" readonly>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-lg-6">
+                    <label class="fw-bold">Current balance ($)</label>
+                    <input type="text" class="form-control num-space" th:field="*{customer.balance}" readonly>
+                </div>
+                <div class="col-lg-6">
+                    <label class="fw-bold">Transaction Amount ($)</label>
+                    <input type="text" class="form-control num-space" name="transactionAmount">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-lg-3">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i>
+                        Deposit
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block th:replace="layout/script" />
+
+</body>
+</html>
