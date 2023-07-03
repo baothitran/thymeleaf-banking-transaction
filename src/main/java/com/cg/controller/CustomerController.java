@@ -99,6 +99,7 @@ public class CustomerController {
             deposit.setCustomer(customer);
 
             model.addAttribute("deposit", deposit);
+            model.addAttribute("success",true);
         }
 
         return "customer/deposit";
@@ -192,6 +193,7 @@ public String doUpdate(@PathVariable Long id, @ModelAttribute Customer customer,
                 withdrawService.save(withdraw);
 
                 model.addAttribute("withdraw", withdraw);
+                model.addAttribute("success",true);
             }
         }
 

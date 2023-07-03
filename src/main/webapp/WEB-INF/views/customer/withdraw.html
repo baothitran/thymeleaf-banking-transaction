@@ -9,7 +9,7 @@
 <div class="container">
   <header>
     <div class="col-lg-6">
-      <h1>Deposit</h1>
+      <h1>Withdraw</h1>
     </div>
     <div class="col-lg-6 header-right-button">
       <a href="/customers">
@@ -22,6 +22,20 @@
   </header>
 
   <div class="content">
+    <div th:if="${success}">
+      <!--                            <h4 style="color: green;" th:text="${message}"></h4>-->
+      <script>
+        window.onload = function (){
+          Swal.fire({
+            position: 'top-end',
+            icon: 'success',
+            title: 'Rút tiền thành công',
+            showConfirmButton: false,
+            timer: 1500
+          })
+        }
+      </script>
+    </div>
     <form method="post" th:object="${withdraw}">
       <div class="row mb-3">
         <div class="col-lg-6">

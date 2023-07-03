@@ -15,7 +15,5 @@ header{
     background-color: #4caf50;
     color: #fff;
     font-weight: bold;
-}
-.swal-wide{
-    width:850px !important;
+    text-align: center;
 }

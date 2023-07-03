@@ -22,6 +22,20 @@
     </header>
 
     <div class="content">
+        <div th:if="${success}">
+            <!--                            <h4 style="color: green;" th:text="${message}"></h4>-->
+            <script>
+                window.onload = function (){
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Nạp tiền thành công',
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                }
+            </script>
+        </div>
         <form method="post" th:object="${deposit}">
             <div class="row mb-3">
                 <div class="col-lg-6">
@@ -45,7 +59,7 @@
             </div>
             <div class="row mb-3">
                 <div class="col-lg-3">
-                    <button type="submit" class="btn btn-outline-primary">
+                    <button type="submit" class="btn btn-outline-success">
                         <i class="fas fa-plus"></i>
                         Deposit
                     </button>
