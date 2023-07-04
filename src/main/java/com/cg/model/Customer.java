@@ -1,19 +1,24 @@
 package com.cg.model;
 
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "customers")
-public class Customer extends BaseEntity {
+public class Customer extends BaseEntity implements Validator {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+//    @NotBlank(message = "Họ tên là bắt buộc")
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+//    @NotBlank(message = "Email là bắt buộc")
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -82,5 +87,27 @@ public class Customer extends BaseEntity {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+    @Override
+    public boolean supports(Class<?> aClass) {
+
+        return Customer.class.isAssignableFrom(aClass);
+    }
+
+    @Override
+    public void validate(Object target, Errors errors) {
+        Customer customer = (Customer) target;
+
+        String fullName = customer.fullName;
+
+        if (fullName.length() == 0) {
+            errors.rejectValue("fullName", "fullName.empty" );
+        }
+        else {
+            if (fullName.length() < 5 || fullName.length() > 20) {
+                errors.rejectValue("fullName", "fullName.length");
+            }
+        }
+
     }
 }

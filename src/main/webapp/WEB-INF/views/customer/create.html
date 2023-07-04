@@ -67,6 +67,22 @@
             </div>
         </form>
     </div>
+    <footer class="alert ">
+        <div class="container">
+            <div class="error-area">
+                <th:block th:if="${hasError} == true">
+                    <ul>
+                        <li class="alert alert-danger" th:each="err : ${#fields.errors('customer.*')}" th:text="${err}"></li>
+                    </ul>
+                </th:block>
+                <th:block th:if="${notValid} == true">
+                    <ul>
+                        <li th:text="${message}"></li>
+                    </ul>
+                </th:block>
+            </div>
+        </div>
+    </footer>
 </div>
 <th:block th:replace="layout/script"/>
 </body>

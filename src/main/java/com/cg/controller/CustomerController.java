@@ -2,13 +2,16 @@ package com.cg.controller;
 
 import com.cg.model.Customer;
 import com.cg.model.Deposit;
+import com.cg.model.Transfer;
 import com.cg.model.Withdraw;
 import com.cg.service.customer.ICustomerService;
 import com.cg.service.deposit.IDepositService;
+import com.cg.service.transfer.ITransferService;
 import com.cg.service.withdraw.IWithDrawService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -30,10 +33,12 @@ public class CustomerController {
     private IDepositService depositService;
     @Autowired
     private IWithDrawService withdrawService;
+    @Autowired
+    private ITransferService transferService;
 
     @GetMapping
     public String showListPage(Model model) {
-        List<Customer> customers = customerService.findAll();
+        List<Customer> customers = customerService.findAllByDeletedIsFalse();
 
         model.addAttribute("customers", customers);
 
@@ -67,14 +72,30 @@ public class CustomerController {
 
 
     @PostMapping("/create")
-    public String doCreate(@ModelAttribute Customer customer,RedirectAttributes redirectAttributes) {
+    public String doCreate(Model model, @ModelAttribute Customer customer, BindingResult bindingResult) {
+
+        new Customer().validate(customer, bindingResult);
+
+        if (bindingResult.hasFieldErrors()) {
+            model.addAttribute("hasError", true);
+            return "customer/create";
+        }
+
+        String email = customer.getEmail();
+
+        Boolean existsEmail = customerService.existsByEmail(email);
+
+        if (existsEmail) {
+            model.addAttribute("notValid", true);
+            model.addAttribute("message", "Email đã tồn tại");
+            return "customer/create";
+        }
 
         customer.setId(null);
         customer.setBalance(BigDecimal.ZERO);
         customerService.save(customer);
-        redirectAttributes.addFlashAttribute("success", true);
 
-        return "redirect:/customers/create";
+        return "customer/create";
     }
 
     @PostMapping("/deposit/{customerId}")
@@ -198,5 +219,75 @@ public String doUpdate(@PathVariable Long id, @ModelAttribute Customer customer,
         }
 
         return "customer/withdraw";
+    }
+    @GetMapping("/suspended/{customerId}")
+    public ModelAndView showSuspendForm(@PathVariable Long customerId) {
+        ModelAndView modelAndView = new ModelAndView("/customer/suspend");
+        Customer customer = customerService.findById(customerId).get();
+        modelAndView.addObject("currentCustomer", customer);
+        return modelAndView;
+    }
+    @PostMapping("/suspended/{customerId}")
+    public String suspendCustomer(@PathVariable Long customerId, RedirectAttributes redirectAttributes) {
+        Optional<Customer> optionalCustomer = customerService.findById(customerId);
+
+        if (optionalCustomer.isPresent()) {
+            Customer customer = optionalCustomer.get();
+            customer.setDeleted(true);
+            customerService.save(customer);
+//            redirectAttributes.addFlashAttribute("success", true);
+//            redirectAttributes.addFlashAttribute("message", "Khách hàng đã bị tạm hoãn thành công");
+        } else {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("message", "Không tìm thấy khách hàng");
+        }
+
+        return "redirect:/customers";
+    }
+    @GetMapping("/transfer/{customerId}")
+    public ModelAndView showTransfer(@PathVariable Long customerId) {
+        ModelAndView modelAndView = new ModelAndView("/customer/transfer");
+        Customer sender = customerService.findById(customerId).get();
+        List<Customer> recipients = customerService.findAllByIdNot(customerId);
+        modelAndView.addObject("sender", sender);
+        modelAndView.addObject("recipients", recipients);
+        return modelAndView;
+    }
+    @PostMapping("/transfer/{customerId}")
+    public ModelAndView transfer(@PathVariable Long customerId, @RequestParam("recipientId") long recipientId, @RequestParam("fees") long fees, @RequestParam("transfer") long transferAmount) {
+        List<String> errors = new ArrayList<>();
+        List<String> messages = new ArrayList<>();
+        ModelAndView modelAndView = new ModelAndView("/customer/transfer");
+        Customer customerSender = customerService.findById(customerId).get();
+        Customer customerRecipient = customerService.findById(recipientId).get();
+        if (errors.isEmpty()) {
+            long fees_amount = (fees * transferAmount) / 100;
+            long transaction_amount = transferAmount + fees_amount;
+
+            if (customerSender.getBalance().compareTo(BigDecimal.valueOf(transaction_amount)) < 0) {
+                errors.add("Số dư không đủ" + customerSender.getBalance().subtract(BigDecimal.valueOf(fees_amount)));
+            } else {
+                BigDecimal balanceSender = customerSender.getBalance().subtract(BigDecimal.valueOf(transaction_amount));
+                BigDecimal balanceRecipent = customerRecipient.getBalance().add(BigDecimal.valueOf(transferAmount));
+                if (balanceRecipent.toString().length() > 12) {
+                    errors.add("Tổng tiền gửi nhỏ hơn 12 chữ số.");
+                } else {
+                    customerSender.setBalance(balanceSender);
+                    customerRecipient.setBalance(balanceRecipent);
+                    //BigDecimal fees, BigDecimal fees_amount, BigDecimal transaction_amount, BigDecimal transfer_amount, Long recipient_id, Long sender_id
+                    Transfer transfer = new Transfer(BigDecimal.valueOf(fees), BigDecimal.valueOf(fees_amount), BigDecimal.valueOf(transaction_amount), BigDecimal.valueOf(transferAmount), recipientId, customerId);
+                    customerService.save(customerSender);
+                    customerService.save(customerRecipient);
+                    transferService.save(transfer);
+                    messages.add("Customer update successfully");
+                }
+            }
+        }
+        List<Customer> recipients = customerService.findAllByIdNot(customerId);
+        modelAndView.addObject("sender", customerSender);
+        modelAndView.addObject("recipients", recipients);
+        modelAndView.addObject("messages", messages);
+        modelAndView.addObject("errors", errors);
+        return modelAndView;
     }
 }

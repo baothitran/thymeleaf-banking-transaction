@@ -41,4 +41,19 @@ public class CustomerServiceImpl implements ICustomerService {
     public void deleteById(Long id) {
         customerRepository.deleteById(id);
     }
+
+    @Override
+    public List<Customer> findAllByDeletedIsFalse() {
+        return customerRepository.findAllByDeletedIsFalse();
+    }
+
+    @Override
+    public List<Customer> findAllByIdNot(Long id) {
+        return customerRepository.findAllByIdNot(id);
+    }
+
+    @Override
+    public Boolean existsByEmail(String email) {
+        return customerRepository.existsByEmail(email);
+    }
 }
